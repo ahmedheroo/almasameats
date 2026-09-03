@@ -1,0 +1,37 @@
+<div class="page-header">
+  <h1 class="page-title">الفواتير</h1>
+</div>
+<div class="search-section">
+  <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="filterInvoices()" placeholder="بحث برقم الفاتورة...">
+</div>
+<div class="table-container card">
+  <table>
+    <thead>
+      <tr>
+        <th>رقم الفاتورة</th>
+        <th>التاريخ</th>
+        <th>الكاشير</th>
+        <th>طريقة الدفع</th>
+        <th>الإجمالي</th>
+        <th>الإجراءات</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (inv of filteredInvoices(); track inv.id) {
+        <tr>
+          <td><strong>#{{ inv.invoiceNumber }}</strong></td>
+          <td>{{ inv.createdAt | arabicDate }}</td>
+          <td>{{ inv.cashierName }}</td>
+          <td><span class="badge badge-info">{{ inv.paymentMethod }}</span></td>
+          <td><strong>{{ inv.total.toFixed(2) }} ر.س</strong></td>
+          <td>
+            <a [routerLink]="['/invoices', inv.id]" class="btn btn-sm btn-outline">عرض</a>
+          </td>
+        </tr>
+      }
+      @empty {
+        <tr><td colspan="6" class="text-center" style="padding:2rem;color:#9ca3af">لا توجد فواتير</td></tr>
+      }
+    </tbody>
+  </table>
+</div>
