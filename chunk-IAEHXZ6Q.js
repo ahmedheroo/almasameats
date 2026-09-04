@@ -1,1 +1,0 @@
-import{La as a}from"./chunk-TVJXR3AM.js";var i=class e{transform(t){return new Date(t).toLocaleDateString("ar-SA",{year:"numeric",month:"long",day:"numeric"})}static \u0275fac=function(r){return new(r||e)};static \u0275pipe=a({name:"arabicDate",type:e,pure:!0})};export{i as a};
