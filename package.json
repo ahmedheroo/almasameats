@@ -9,7 +9,9 @@
     "client": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "render:build": "ng build --configuration production",
+    "render:start": "node server.js"
   },
   "prettier": {
     "printWidth": 100,
