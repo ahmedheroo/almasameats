@@ -11,7 +11,7 @@
           <div class="product-image">{{ product.name.charAt(0) }}</div>
           <div class="product-info">
             <div class="product-name">{{ product.name }}</div>
-            <div class="product-price">{{ product.price.toFixed(2) }} &#x0631;.&#x0633;</div>
+            <div class="product-price">{{ product.price.toFixed(2) }} ر.س</div>
           </div>
           <button class="add-btn" (click)="addToCart(product); $event.stopPropagation()"><i class="fas fa-plus"></i></button>
         </div>
@@ -97,7 +97,7 @@
   <div class="mobile-cart-overlay" (click)="showMobileCart = false">
     <div class="mobile-cart-panel" (click)="$event.stopPropagation()">
       <div class="mobile-cart-header">
-        <h2><i class="fas fa-shopping-cart"></i> &#x0627;&#x0644;&#x0633;&#x0644;&#x0629;</h2>
+        <h2><i class="fas fa-shopping-cart"></i> السلة</h2>
         <button class="close-btn" (click)="showMobileCart = false"><i class="fas fa-times"></i></button>
       </div>
       <div class="cart-items mobile-cart-items">
@@ -105,7 +105,7 @@
           <div class="cart-item">
             <div class="cart-item-info">
               <span class="cart-item-name">{{ item.product.name }}</span>
-              <span class="cart-item-price">{{ item.product.price.toFixed(2) }} &#x0631;.&#x0633;</span>
+              <span class="cart-item-price">{{ item.product.price.toFixed(2) }} ر.س</span>
             </div>
             <div class="cart-item-controls">
               <button class="qty-btn" (click)="cartService.decrementQuantity(item.product.id)"><i class="fas fa-minus"></i></button>
@@ -118,29 +118,28 @@
       </div>
       <div class="cart-footer">
         <div class="cart-row">
-          <span>&#x0627;&#x0644;&#x0645;&#x062C;&#x0645;&#x0648;&#x0639; &#x0627;&#x0644;&#x0641;&#x0631;&#x0639;&#x064A;</span>
-          <span>{{ cartService.subtotal().toFixed(2) }} &#x0631;.&#x0633;</span>
+          <span>المجموع الفرعي</span>
+          <span>{{ cartService.subtotal().toFixed(2) }} ر.س</span>
         </div>
         <div class="cart-row">
-          <span>&#x0627;&#x0644;&#x062E;&#x0635;&#x0645;</span>
+          <span>الخصم</span>
           <input type="number" [(ngModel)]="discountAmount" (ngModelChange)="onDiscountChange()" min="0" class="discount-input" placeholder="0">
         </div>
         <div class="cart-row">
-          <span>&#x0627;&#x0644;&#x0636;&#x0631;&#x064A;&#x0628;&#x0629; ({{ settings().taxRate }}%)</span>
-          <span>{{ taxAmount().toFixed(2) }} &#x0631;.&#x0633;</span>
+          <span>الضريبة ({{ settings().taxRate }}%)</span>
+          <span>{{ taxAmount().toFixed(2) }} ر.س</span>
         </div>
         <div class="cart-row total-row">
-          <span>&#x0627;&#x0644;&#x0625;&#x062C;&#x0645;&#x0627;&#x0644;&#x064A; &#x0627;&#x0644;&#x0646;&#x0647;&#x0627;&#x0626;&#x064A;</span>
-          <span>{{ finalTotal().toFixed(2) }} &#x0631;.&#x0633;</span>
+          <span>المجموع النهائي</span>
+          <span>{{ finalTotal().toFixed(2) }} ر.س</span>
         </div>
         <div class="payment-method">
           <select [(ngModel)]="paymentMethod">
-            <option value="&#x0646;&#x0642;&#x062F;&#x064A;">&#x0646;&#x0642;&#x062F;&#x064A;</option>
-            <option value="&#x0628;&#x0637;&#x0627;&#x0642;&#x0629; &#x0628;&#x0646;&#x0643;&#x064A;&#x0629;">&
-#x0628;&#x0646;&#x0643;&#x064A;&#x0629;</option>
+            <option value="نقدي">نقدي"</option>
+            <option value="شبكة">شبكة</option>
           </select>
         </div>
-        <button class="btn btn-success btn-block btn-lg checkout-btn" (click)="completeSale()"><i class="fas fa-check-circle"></i> &#x0625;&#x062A;&#x0645;&#x0627;&#x0645; &#x0627;&#x0644;&#x0628;&#x064A;&#x0639;</button>
+        <button class="btn btn-success btn-block btn-lg checkout-btn" (click)="completeSale()"><i class="fas fa-check-circle"></i> إتمام البيع</button>
       </div>
     </div>
   </div>
@@ -156,19 +155,19 @@
         }
         <div class="inv-shop">{{ settings().shopName }}</div>
         <div class="inv-addr">{{ settings().address }}</div>
-        <div class="inv-phone">&#x0647;&#x0627;&#x062A;&#x0641;: {{ settings().phone }}</div>
-        <div class="inv-taxid">&#x0627;&#x0644;&#x0631;&#x0642;&#x0645; &#x0627;&#x0644;&#x0636;&#x0631;&#x064A;&#x0628;&#x064A;: {{ settings().taxId }}</div>
+        <div class="inv-phone">هاتف: {{ settings().phone }}</div>
+        <div class="inv-taxid">الرقم الضريبي: {{ settings().taxId }}</div>
       </div>
       <div class="inv-meta">
-        <div>&#x0631;&#x0642;&#x0645; &#x0627;&#x0644;&#x0641;&#x0627;&#x062A;&#x0648;&#x0631;&#x0629;: {{ lastInvoice.invoiceNumber }}</div>
-        <div>&#x0627;&#x0644;&#x062A;&#x0627;&#x0631;&#x064A;&#x062E;: {{ lastInvoice.createdAt | arabicDate }}</div>
-        <div>&#x0627;&#x0644;&#x0648;&#x0642;&#x062A;: {{ lastInvoice.createdAt | arabicTime }}</div>
-        <div>&#x0627;&#x0644;&#x0643;&#x0627;&#x0634;&#x064A;&#x0631;: {{ lastInvoice.cashierName }}</div>
-        <div>&#x0637;&#x0631;&#x064A;&#x0642;&#x0629; &#x0627;&#x0644;&#x062F;&#x0641;&#x0639;: {{ lastInvoice.paymentMethod }}</div>
+        <div>رقم الفاتورة: {{ lastInvoice.invoiceNumber }}</div>
+        <div>التاريخ: {{ lastInvoice.createdAt | arabicDate }}</div>
+        <div>الوقت: {{ lastInvoice.createdAt | arabicTime }}</div>
+        <div>الكاشير: {{ lastInvoice.cashierName }}</div>
+        <div>طريقة الدفع: {{ lastInvoice.paymentMethod }}</div>
       </div>
       <hr class="inv-divider">
       <table class="inv-table">
-        <thead><tr><th>&#x0627;&#x0644;&#x0645;&#x0646;&#x062A;&#x062C;</th><th>&#x0627;&#x0644;&#x0643;&#x0645;&#x064A;&#x0629;</th><th>&#x0627;&#x0644;&#x0633;&#x0639;&#x0631;</th><th>&#x0627;&#x0644;&#x0625;&#x062C;&#x0645;&#x0627;&#x0644;&#x064A;</th></tr></thead>
+        <thead><tr><th>المنتج</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead>
         <tbody>
           @for (item of lastInvoice.items; track item.productId) {
             <tr><td>{{ item.productName }}</td><td>{{ item.quantity }}</td><td>{{ item.unitPrice.toFixed(2) }}</td><td>{{ item.total.toFixed(2) }}</td></tr>
@@ -177,13 +176,13 @@
       </table>
       <hr class="inv-divider">
       <div class="inv-totals">
-        <div class="inv-row"><span>&#x0627;&#x0644;&#x0645;&#x062C;&#x0645;&#x0648;&#x0639;:</span><span>{{ lastInvoice.subtotal.toFixed(2) }}</span></div>
-        @if (lastInvoice.discount > 0) { <div class="inv-row"><span>&#x0627;&#x0644;&#x062E;&#x0635;&#x0645;:</span><span>-{{ lastInvoice.discount.toFixed(2) }}</span></div> }
-        <div class="inv-row"><span>&#x0636;&#x0631;&#x064A;&#x0628;&#x0629; &#x0627;&#x0644;&#x0642;&#x064A;&#x0645;&#x0629; &#x0627;&#x0644;&#x0645;&#x0636;&#x0627;&#x0641;&#x0629; ({{ lastInvoice.taxRate }}%):</span><span>{{ lastInvoice.taxAmount.toFixed(2) }}</span></div>
-        <div class="inv-row inv-total"><span>&#x0627;&#x0644;&#x0645;&#x062C;&#x0645;&#x0648;&#x0639; &#x0627;&#x0644;&#x0635;&#x0627;&#x0641;&#x064A;:</span><span>{{ lastInvoice.total.toFixed(2) }}</span></div>
+        <div class="inv-row"><span>المجموع:</span><span>{{ lastInvoice.subtotal.toFixed(2) }}</span></div>
+        @if (lastInvoice.discount > 0) { <div class="inv-row"><span>الخصم:</span><span>-{{ lastInvoice.discount.toFixed(2) }}</span></div> }
+        <div class="inv-row"><span>ضريبة البيع ({{ lastInvoice.taxRate }}%):</span><span>{{ lastInvoice.taxAmount.toFixed(2) }}</span></div>
+        <div class="inv-row inv-total"><span>المجموع النهائي:</span><span>{{ lastInvoice.total.toFixed(2) }}</span></div>
       </div>
       <div class="inv-footer">
-        <p>&#x0634;&#x0643;&#x0631;&#x0627;&#x064B; &#x0644;&#x062A;&#x0633;&#x0648;&#x0642;&#x0643;&#x0645;</p>
+        <p>شكراً لزيارتكم</p>
         <p class="inv-shop-name">{{ settings().shopName }}</p>
         <div id="qrCode" class="qr-code"></div>
       </div>
