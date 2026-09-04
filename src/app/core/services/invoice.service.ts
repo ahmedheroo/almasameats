@@ -1,6 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { environment } from 'environments/environment';
 import { Invoice, InvoiceItem, PaymentMethod } from '../models';
 import { CartService } from './cart.service';
 import { AuthService } from './auth.service';
@@ -17,7 +18,7 @@ export class InvoiceService {
   readonly invoices = this._invoices.asReadonly();
 
   async loadInvoices(): Promise<void> {
-    const invoices = await firstValueFrom(this.http.get<Invoice[]>('/api/invoices'));
+    const invoices = await firstValueFrom(this.http.get<Invoice[]>(`${environment.apiBaseUrl}/api/invoices`));
     this._invoices.set(invoices);
   }
 
@@ -41,7 +42,7 @@ export class InvoiceService {
 
     const invoice: Invoice = {
       id: Date.now().toString(36) + Math.random().toString(36).substring(2, 9),
-      invoiceNumber: 0, // Server will assign
+      invoiceNumber: 0,
       items: invoiceItems,
       subtotal: Math.round(subtotal * 100) / 100,
       discount: Math.round(discount * 100) / 100,
@@ -53,10 +54,9 @@ export class InvoiceService {
       createdAt: new Date().toISOString()
     };
 
-    const saved = await firstValueFrom(this.http.post<Invoice>('/api/invoices', invoice));
+    const saved = await firstValueFrom(this.http.post<Invoice>(`${environment.apiBaseUrl}/api/invoices`, invoice));
     this._invoices.update(list => [saved, ...list]);
     this.cartService.clear();
-
     return saved;
   }
 
@@ -85,7 +85,6 @@ export class InvoiceService {
 
   getTopProducts(limit: number = 5): { name: string; count: number; total: number }[] {
     const map = new Map<string, { name: string; count: number; total: number }>();
-
     for (const inv of this._invoices()) {
       for (const item of inv.items) {
         const existing = map.get(item.productId);
@@ -101,7 +100,6 @@ export class InvoiceService {
         }
       }
     }
-
     return Array.from(map.values())
       .sort((a, b) => b.count - a.count)
       .slice(0, limit);

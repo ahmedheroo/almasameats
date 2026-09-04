@@ -1,6 +1,7 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { environment } from 'environments/environment';
 import { User } from '../models';
 
 const AUTH_KEY = 'pos_current_user';
@@ -25,7 +26,7 @@ export class AuthService {
   async login(username: string, password: string): Promise<{ success: boolean; message: string }> {
     try {
       const user = await firstValueFrom(
-        this.http.post<User>('/api/users/login', { username, password })
+        this.http.post<User>(`${environment.apiBaseUrl}/api/users/login`, { username, password })
       );
       this._currentUser.set(user);
       localStorage.setItem(AUTH_KEY, JSON.stringify(user));
@@ -42,38 +43,35 @@ export class AuthService {
   }
 
   async getUsersList(): Promise<User[]> {
-    const users = await firstValueFrom(this.http.get<User[]>('/api/users'));
+    const users = await firstValueFrom(this.http.get<User[]>(`${environment.apiBaseUrl}/api/users`));
     return users.filter(u => u.active);
   }
 
   async getAllUsers(): Promise<User[]> {
-    return firstValueFrom(this.http.get<User[]>('/api/users'));
+    return firstValueFrom(this.http.get<User[]>(`${environment.apiBaseUrl}/api/users`));
   }
 
   async createUser(userData: Omit<User, 'id' | 'createdAt' | 'password'> & { password?: string }): Promise<User> {
-    return firstValueFrom(this.http.post<User>('/api/users', userData));
+    return firstValueFrom(this.http.post<User>(`${environment.apiBaseUrl}/api/users`, userData));
   }
 
   async updateUser(id: string, data: Partial<User> & { password?: string }): Promise<User> {
-    const updated = await firstValueFrom(this.http.put<User>(`/api/users/${id}`, data));
-
-    // Update local session if editing self
+    const updated = await firstValueFrom(this.http.put<User>(`${environment.apiBaseUrl}/api/users/${id}`, data));
     const current = this._currentUser();
     if (current?.id === id) {
       this._currentUser.set(updated);
       localStorage.setItem(AUTH_KEY, JSON.stringify(updated));
     }
-
     return updated;
   }
 
   async deleteUser(id: string): Promise<void> {
-    await firstValueFrom(this.http.delete(`/api/users/${id}`));
+    await firstValueFrom(this.http.delete(`${environment.apiBaseUrl}/api/users/${id}`));
   }
 
   async seedDefaultData(): Promise<void> {
     try {
-      await firstValueFrom(this.http.post('/api/users/seed', {}));
+      await firstValueFrom(this.http.post(`${environment.apiBaseUrl}/api/users/seed`, {}));
     } catch {
       // Server might not be running yet
     }

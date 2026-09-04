@@ -1,6 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { environment } from 'environments/environment';
 import { Product } from '../models';
 
 @Injectable({ providedIn: 'root' })
@@ -10,7 +11,7 @@ export class ProductService {
   readonly products = this._products.asReadonly();
 
   async loadProducts(): Promise<void> {
-    const products = await firstValueFrom(this.http.get<Product[]>('/api/products'));
+    const products = await firstValueFrom(this.http.get<Product[]>(`${environment.apiBaseUrl}/api/products`));
     this._products.set(products);
   }
 
@@ -36,24 +37,24 @@ export class ProductService {
   }
 
   async createProduct(data: Omit<Product, 'id' | 'createdAt'>): Promise<Product> {
-    const product = await firstValueFrom(this.http.post<Product>('/api/products', data));
+    const product = await firstValueFrom(this.http.post<Product>(`${environment.apiBaseUrl}/api/products`, data));
     this._products.update(list => [...list, product]);
     return product;
   }
 
   async updateProduct(id: string, data: Partial<Product>): Promise<Product> {
-    const updated = await firstValueFrom(this.http.put<Product>(`/api/products/${id}`, data));
+    const updated = await firstValueFrom(this.http.put<Product>(`${environment.apiBaseUrl}/api/products/${id}`, data));
     this._products.update(list => list.map(p => p.id === id ? updated : p));
     return updated;
   }
 
   async deleteProduct(id: string): Promise<void> {
-    await firstValueFrom(this.http.delete(`/api/products/${id}`));
+    await firstValueFrom(this.http.delete(`${environment.apiBaseUrl}/api/products/${id}`));
     this._products.update(list => list.filter(p => p.id !== id));
   }
 
   async toggleActive(id: string): Promise<void> {
-    const updated = await firstValueFrom(this.http.patch<Product>(`/api/products/${id}/toggle`, {}));
+    const updated = await firstValueFrom(this.http.patch<Product>(`${environment.apiBaseUrl}/api/products/${id}/toggle`, {}));
     this._products.update(list => list.map(p => p.id === id ? updated : p));
   }
 
@@ -63,7 +64,7 @@ export class ProductService {
 
   async seedDefaultProducts(): Promise<void> {
     try {
-      await firstValueFrom(this.http.post('/api/products/seed', {}));
+      await firstValueFrom(this.http.post(`${environment.apiBaseUrl}/api/products/seed`, {}));
     } catch {
       // Server might not be running yet
     }
