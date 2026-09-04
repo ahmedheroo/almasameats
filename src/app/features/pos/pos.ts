@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, ViewChild, ElementRef } from '@angular/core';
+import { Component, signal, computed, inject, ViewChild, ElementRef, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../core/services/cart.service';
 import { ProductService } from '../../core/services/product.service';
@@ -8,6 +8,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { Product, Invoice, PaymentMethod } from '../../core/models';
 import { ArabicDatePipe } from '../../shared/pipes/date.pipe';
 import { ArabicTimePipe } from '../../shared/pipes/time.pipe';
+import { encodeZatcaQr, formatZatcaTimestamp, formatZatcaAmount } from '../../core/utils/zatca-qr';
 import QRCode from 'qrcode';
 
 @Component({
@@ -17,7 +18,7 @@ import QRCode from 'qrcode';
   templateUrl: './pos.html',
   styleUrl: './pos.scss'
 })
-export class Pos {
+export class Pos implements OnInit {
   @ViewChild('printArea') printArea!: ElementRef;
   cartService = inject(CartService);
   private productService = inject(ProductService);
@@ -33,7 +34,7 @@ export class Pos {
   lastInvoice: Invoice | null = null;
   settings = computed(() => this.settingsService.settings());
 
-  filteredProducts = signal<Product[]>(this.productService.getActiveProducts());
+  filteredProducts = signal<Product[]>([]);
 
   taxAmount = computed(() => {
     const sub = this.cartService.subtotal();
@@ -48,6 +49,10 @@ export class Pos {
     const tax = this.taxAmount();
     return Math.max(0, Math.round((sub - disc + tax) * 100) / 100);
   });
+
+  ngOnInit(): void {
+    this.filteredProducts.set(this.productService.getActiveProducts());
+  }
 
   onSearch(): void {
     const q = this.searchQuery.trim();
@@ -90,19 +95,27 @@ export class Pos {
       this.toast.error('السلة فارغة');
       return;
     }
-    this.lastInvoice = this.invoiceService.completeSale(this.paymentMethod);
+    this.lastInvoice = await this.invoiceService.completeSale(this.paymentMethod);
     this.discountAmount = 0;
     this.showMobileCart = false;
     this.toast.success('تم إتمام البيع بنجاح');
 
-    // Generate QR code
+    // Generate ZATCA-compliant QR code
     setTimeout(async () => {
       const qrEl = document.getElementById('qrCode');
       if (qrEl && this.lastInvoice) {
-        const data = `INV:${this.lastInvoice.invoiceNumber}|TOTAL:${this.lastInvoice.total}|TAX:${this.lastInvoice.taxAmount}|DATE:${this.lastInvoice.createdAt}`;
+        const s = this.settings();
+        const qrBase64 = encodeZatcaQr({
+          sellerName: s.shopName,
+          vatNumber: s.taxId,
+          timestamp: formatZatcaTimestamp(this.lastInvoice.createdAt),
+          invoiceTotal: formatZatcaAmount(this.lastInvoice.total),
+          vatTotal: formatZatcaAmount(this.lastInvoice.taxAmount),
+        });
+
         try {
-          const url = await QRCode.toDataURL(data, { width: 120 });
-          qrEl.innerHTML = `<img src="${url}" width="120" height="120">`;
+          const url = await QRCode.toDataURL(qrBase64, { width: 150, margin: 1 });
+          qrEl.innerHTML = `<img src="${url}" width="150" height="150">`;
         } catch { /* ignore */ }
       }
     }, 100);

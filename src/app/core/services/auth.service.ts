@@ -1,19 +1,13 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { User } from '../models';
 
-const STORAGE_KEY = 'pos_users';
 const AUTH_KEY = 'pos_current_user';
-
-async function hashPassword(password: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private http = inject(HttpClient);
   private readonly _currentUser = signal<User | null>(this.loadUser());
   readonly currentUser = this._currentUser.asReadonly();
   readonly isAuthenticated = computed(() => this._currentUser() !== null);
@@ -28,35 +22,18 @@ export class AuthService {
     }
   }
 
-  private getUsers(): User[] {
-    try {
-      const data = localStorage.getItem(STORAGE_KEY);
-      return data ? JSON.parse(data) : [];
-    } catch {
-      return [];
-    }
-  }
-
-  private saveUsers(users: User[]): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
-  }
-
-  private generateId(): string {
-    return Date.now().toString(36) + Math.random().toString(36).substring(2, 9);
-  }
-
   async login(username: string, password: string): Promise<{ success: boolean; message: string }> {
-    const hashed = await hashPassword(password);
-    const users = this.getUsers();
-    const user = users.find(u => u.username === username && u.password === hashed && u.active);
-
-    if (!user) {
-      return { success: false, message: 'اسم المستخدم أو كلمة المرور غير صحيحة' };
+    try {
+      const user = await firstValueFrom(
+        this.http.post<User>('/api/users/login', { username, password })
+      );
+      this._currentUser.set(user);
+      localStorage.setItem(AUTH_KEY, JSON.stringify(user));
+      return { success: true, message: 'تم تسجيل الدخول بنجاح' };
+    } catch (err: any) {
+      const message = err?.error?.message || 'اسم المستخدم أو كلمة المرور غير صحيحة';
+      return { success: false, message };
     }
-
-    this._currentUser.set(user);
-    localStorage.setItem(AUTH_KEY, JSON.stringify(user));
-    return { success: true, message: 'تم تسجيل الدخول بنجاح' };
   }
 
   logout(): void {
@@ -64,88 +41,41 @@ export class AuthService {
     localStorage.removeItem(AUTH_KEY);
   }
 
-  getUsersList(): User[] {
-    return this.getUsers().filter(u => u.active);
+  async getUsersList(): Promise<User[]> {
+    const users = await firstValueFrom(this.http.get<User[]>('/api/users'));
+    return users.filter(u => u.active);
   }
 
-  getAllUsers(): User[] {
-    return this.getUsers();
+  async getAllUsers(): Promise<User[]> {
+    return firstValueFrom(this.http.get<User[]>('/api/users'));
   }
 
   async createUser(userData: Omit<User, 'id' | 'createdAt' | 'password'> & { password?: string }): Promise<User> {
-    const users = this.getUsers();
-
-    if (users.some(u => u.username === userData.username)) {
-      throw new Error('اسم المستخدم موجود بالفعل');
-    }
-
-    const hashed = await hashPassword(userData.password || '123456');
-    const newUser: User = {
-      ...userData,
-      id: this.generateId(),
-      password: hashed,
-      createdAt: new Date().toISOString(),
-      active: true
-    };
-
-    users.push(newUser);
-    this.saveUsers(users);
-    return newUser;
+    return firstValueFrom(this.http.post<User>('/api/users', userData));
   }
 
   async updateUser(id: string, data: Partial<User> & { password?: string }): Promise<User> {
-    const users = this.getUsers();
-    const index = users.findIndex(u => u.id === id);
+    const updated = await firstValueFrom(this.http.put<User>(`/api/users/${id}`, data));
 
-    if (index === -1) {
-      throw new Error('المستخدم غير موجود');
-    }
-
-    if (data.password) {
-      data.password = await hashPassword(data.password);
-    } else {
-      delete data.password;
-    }
-
-    users[index] = { ...users[index], ...data };
-    this.saveUsers(users);
-
+    // Update local session if editing self
     const current = this._currentUser();
     if (current?.id === id) {
-      this._currentUser.set(users[index]);
-      localStorage.setItem(AUTH_KEY, JSON.stringify(users[index]));
+      this._currentUser.set(updated);
+      localStorage.setItem(AUTH_KEY, JSON.stringify(updated));
     }
 
-    return users[index];
+    return updated;
   }
 
-  deleteUser(id: string): void {
-    const users = this.getUsers();
-    const index = users.findIndex(u => u.id === id);
-
-    if (index !== -1) {
-      users[index].active = false;
-      this.saveUsers(users);
-    }
+  async deleteUser(id: string): Promise<void> {
+    await firstValueFrom(this.http.delete(`/api/users/${id}`));
   }
 
-  seedDefaultData(): void {
-    const users = this.getUsers();
-    if (users.length === 0) {
-      this.createUser({
-        username: 'admin',
-        password: '123456',
-        displayName: 'المدير',
-        role: 'admin',
-        active: true
-      });
-        this.createUser({
-        username: 'cashier',
-        password: '123456',
-        displayName: 'بائع',
-        role: 'cashier',
-        active: true
-      });
+  async seedDefaultData(): Promise<void> {
+    try {
+      await firstValueFrom(this.http.post('/api/users/seed', {}));
+    } catch {
+      // Server might not be running yet
     }
   }
 }

@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -12,23 +12,29 @@ import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-di
   templateUrl: './user-list.html',
   styles: []
 })
-export class UserList {
+export class UserList implements OnInit {
   private authService = inject(AuthService);
   private toast = inject(ToastService);
-  users = signal<User[]>(this.authService.getAllUsers());
+  users = signal<User[]>([]);
   showDeleteDialog = signal(false);
   userToDelete: User | null = null;
+
+  async ngOnInit(): Promise<void> {
+    const allUsers = await this.authService.getAllUsers();
+    this.users.set(allUsers);
+  }
 
   confirmDelete(user: User): void {
     this.userToDelete = user;
     this.showDeleteDialog.set(true);
   }
 
-  onDelete(): void {
+  async onDelete(): Promise<void> {
     if (this.userToDelete) {
-      this.authService.deleteUser(this.userToDelete.id);
+      await this.authService.deleteUser(this.userToDelete.id);
       this.toast.success('تم حذف المستخدم');
-      this.users.set(this.authService.getAllUsers());
+      const allUsers = await this.authService.getAllUsers();
+      this.users.set(allUsers);
     }
     this.showDeleteDialog.set(false);
   }

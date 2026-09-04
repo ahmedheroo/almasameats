@@ -3,6 +3,8 @@ import { RouterOutlet } from '@angular/router';
 import { Toast } from './shared/components/toast/toast';
 import { AuthService } from './core/services/auth.service';
 import { ProductService } from './core/services/product.service';
+import { SettingsService } from './core/services/settings.service';
+import { InvoiceService } from './core/services/invoice.service';
 
 @Component({
   selector: 'app-root',
@@ -13,9 +15,14 @@ import { ProductService } from './core/services/product.service';
 export class App implements OnInit {
   private authService = inject(AuthService);
   private productService = inject(ProductService);
+  private settingsService = inject(SettingsService);
+  private invoiceService = inject(InvoiceService);
 
-  ngOnInit(): void {
-    this.authService.seedDefaultData();
-    this.productService.seedDefaultProducts();
+  async ngOnInit(): Promise<void> {
+    await this.settingsService.loadSettings();
+    await this.authService.seedDefaultData();
+    await this.productService.seedDefaultProducts();
+    await this.productService.loadProducts();
+    await this.invoiceService.loadInvoices();
   }
 }

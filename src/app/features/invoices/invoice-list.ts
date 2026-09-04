@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { InvoiceService } from '../../core/services/invoice.service';
@@ -12,10 +12,14 @@ import { ArabicDatePipe } from '../../shared/pipes/date.pipe';
   templateUrl: './invoice-list.html',
   styles: ['.search-section { margin-bottom: 1.5rem; } .search-section input { max-width: 400px; }']
 })
-export class InvoiceList {
+export class InvoiceList implements OnInit {
   private invoiceService = inject(InvoiceService);
   searchQuery = '';
-  filteredInvoices = signal<Invoice[]>(this.invoiceService.invoices());
+  filteredInvoices = signal<Invoice[]>([]);
+
+  ngOnInit(): void {
+    this.filteredInvoices.set(this.invoiceService.invoices());
+  }
 
   filterInvoices(): void {
     this.filteredInvoices.set(this.invoiceService.searchInvoices(this.searchQuery));

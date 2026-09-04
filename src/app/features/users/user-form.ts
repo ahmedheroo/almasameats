@@ -25,12 +25,12 @@ export class UserForm implements OnInit {
     username: '', displayName: '', role: 'cashier', active: true
   };
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEdit.set(true);
       this.userId = id;
-      const users = this.authService.getAllUsers();
+      const users = await this.authService.getAllUsers();
       const user = users.find(u => u.id === id);
       if (user) {
         this.formData = { username: user.username, displayName: user.displayName, role: user.role, active: user.active };

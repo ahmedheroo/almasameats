@@ -5,6 +5,8 @@ import { SettingsService } from '../../core/services/settings.service';
 import { Invoice } from '../../core/models';
 import { ArabicDatePipe } from '../../shared/pipes/date.pipe';
 import { ArabicTimePipe } from '../../shared/pipes/time.pipe';
+import { encodeZatcaQr, formatZatcaTimestamp, formatZatcaAmount } from '../../core/utils/zatca-qr';
+import QRCode from 'qrcode';
 
 @Component({
   selector: 'app-invoice-detail',
@@ -22,7 +24,6 @@ import { ArabicTimePipe } from '../../shared/pipes/time.pipe';
     .inv-total-row { display: flex; justify-content: space-between; padding: 0.35rem 0; font-size: 0.9rem; }
     .inv-grand-total { font-weight: 800; font-size: 1.1rem; border-top: 1px solid #333; margin-top: 0.5rem; padding-top: 0.5rem; }
 
-    /* Print receipt styles */
     .print-only { display: none; }
     .print-receipt {
       width: 80mm; padding: 3mm; font-family: 'Cairo', sans-serif;
@@ -44,6 +45,8 @@ import { ArabicTimePipe } from '../../shared/pipes/time.pipe';
     .pr-footer { margin-top: 5mm; }
     .pr-footer p { margin: 1mm 0; }
     .pr-shop-name { font-weight: 700; }
+    .pr-qr { text-align: center; margin-top: 4mm; }
+    .pr-qr img { width: 35mm; height: 35mm; }
 
     @media print {
       .no-print, .screen-only { display: none !important; }
@@ -61,12 +64,33 @@ export class InvoiceDetail implements OnInit {
 
   invoice = signal<Invoice | undefined>(undefined);
   settings = computed(() => this.settingsService.settings());
+  qrDataUrl = signal<string>('');
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      this.invoice.set(this.invoiceService.getInvoiceById(id));
+      const inv = this.invoiceService.getInvoiceById(id);
+      this.invoice.set(inv);
+
+      if (inv) {
+        this.generateQr(inv);
+      }
     }
+  }
+
+  private generateQr(inv: Invoice): void {
+    const s = this.settings();
+    const qrBase64 = encodeZatcaQr({
+      sellerName: s.shopName,
+      vatNumber: s.taxId,
+      timestamp: formatZatcaTimestamp(inv.createdAt),
+      invoiceTotal: formatZatcaAmount(inv.total),
+      vatTotal: formatZatcaAmount(inv.taxAmount),
+    });
+
+    QRCode.toDataURL(qrBase64, { width: 150, margin: 1 }).then(url => {
+      this.qrDataUrl.set(url);
+    }).catch(() => { /* ignore */ });
   }
 
   printInvoice(): void { window.print(); }

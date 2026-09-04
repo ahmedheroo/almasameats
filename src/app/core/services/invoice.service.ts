@@ -1,44 +1,27 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { Invoice, InvoiceItem, PaymentMethod } from '../models';
 import { CartService } from './cart.service';
 import { AuthService } from './auth.service';
 import { SettingsService } from './settings.service';
 
-const STORAGE_KEY = 'pos_invoices';
-const COUNTER_KEY = 'pos_invoice_counter';
-
 @Injectable({ providedIn: 'root' })
 export class InvoiceService {
-  private readonly _invoices = signal<Invoice[]>(this.loadInvoices());
+  private http = inject(HttpClient);
+  private cartService = inject(CartService);
+  private authService = inject(AuthService);
+  private settingsService = inject(SettingsService);
+
+  private readonly _invoices = signal<Invoice[]>([]);
   readonly invoices = this._invoices.asReadonly();
 
-  constructor(
-    private cartService: CartService,
-    private authService: AuthService,
-    private settingsService: SettingsService
-  ) {}
-
-  private loadInvoices(): Invoice[] {
-    try {
-      const data = localStorage.getItem(STORAGE_KEY);
-      return data ? JSON.parse(data) : [];
-    } catch {
-      return [];
-    }
+  async loadInvoices(): Promise<void> {
+    const invoices = await firstValueFrom(this.http.get<Invoice[]>('/api/invoices'));
+    this._invoices.set(invoices);
   }
 
-  private save(): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(this._invoices()));
-  }
-
-  private getNextNumber(): number {
-    const data = localStorage.getItem(COUNTER_KEY);
-    const next = data ? parseInt(data, 10) + 1 : 1;
-    localStorage.setItem(COUNTER_KEY, next.toString());
-    return next;
-  }
-
-  completeSale(paymentMethod: PaymentMethod): Invoice {
+  async completeSale(paymentMethod: PaymentMethod): Promise<Invoice> {
     const items = this.cartService.items();
     const discount = this.cartService.discount();
     const subtotal = this.cartService.subtotal();
@@ -58,7 +41,7 @@ export class InvoiceService {
 
     const invoice: Invoice = {
       id: Date.now().toString(36) + Math.random().toString(36).substring(2, 9),
-      invoiceNumber: this.getNextNumber(),
+      invoiceNumber: 0, // Server will assign
       items: invoiceItems,
       subtotal: Math.round(subtotal * 100) / 100,
       discount: Math.round(discount * 100) / 100,
@@ -70,11 +53,11 @@ export class InvoiceService {
       createdAt: new Date().toISOString()
     };
 
-    this._invoices.update(list => [invoice, ...list]);
-    this.save();
+    const saved = await firstValueFrom(this.http.post<Invoice>('/api/invoices', invoice));
+    this._invoices.update(list => [saved, ...list]);
     this.cartService.clear();
 
-    return invoice;
+    return saved;
   }
 
   getInvoiceById(id: string): Invoice | undefined {

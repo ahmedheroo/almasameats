@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from '../../core/services/product.service';
@@ -25,13 +25,17 @@ import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-di
     .empty-state-box { text-align: center; color: #9ca3af; padding: 3rem; font-size: 1rem; }
   `]
 })
-export class ProductList {
+export class ProductList implements OnInit {
   private productService = inject(ProductService);
   private toast = inject(ToastService);
   searchQuery = '';
   showDeleteDialog = signal(false);
   productToDelete: Product | null = null;
-  filteredProducts = signal<Product[]>(this.productService.getActiveProducts());
+  filteredProducts = signal<Product[]>([]);
+
+  ngOnInit(): void {
+    this.filteredProducts.set(this.productService.getActiveProducts());
+  }
 
   filterProducts(): void {
     const q = this.searchQuery.trim();
@@ -47,9 +51,9 @@ export class ProductList {
     this.showDeleteDialog.set(true);
   }
 
-  onDelete(): void {
+  async onDelete(): Promise<void> {
     if (this.productToDelete) {
-      this.productService.deleteProduct(this.productToDelete.id);
+      await this.productService.deleteProduct(this.productToDelete.id);
       this.toast.success('تم حذف المنتج');
       this.filterProducts();
     }

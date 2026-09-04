@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SettingsService } from '../../core/services/settings.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -28,8 +28,8 @@ export class SettingsPage implements OnInit {
     this.formData = { ...this.settingsService.settings() };
   }
 
-  onSave(): void {
-    this.settingsService.updateSettings(this.formData);
+  async onSave(): Promise<void> {
+    await this.settingsService.updateSettings(this.formData);
     this.toast.success('تم حفظ الإعدادات بنجاح');
   }
 }

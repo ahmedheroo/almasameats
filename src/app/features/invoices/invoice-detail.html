@@ -38,6 +38,10 @@
       }
       <div class="inv-total-row"><span>الضريبة ({{ inv.taxRate }}%):</span><span>{{ inv.taxAmount.toFixed(2) }} ر.س</span></div>
       <div class="inv-total-row inv-grand-total"><span>الإجمالي النهائي:</span><span>{{ inv.total.toFixed(2) }} ر.س</span></div>
+    </div>      <div style="text-align:center;margin-top:1rem;">
+      @if (qrDataUrl()) {
+        <img [src]="qrDataUrl()" alt="QR كود" width="150" height="150">
+      }
     </div>
   </div>
 
@@ -87,6 +91,9 @@
     <div class="pr-footer">
       <p>شكراً لتسوقكم</p>
       <p class="pr-shop-name">{{ settings().shopName }}</p>
+      @if (qrDataUrl()) {
+        <img [src]="qrDataUrl()" alt="QR كود" style="width:35mm;height:35mm;">
+      }
     </div>
   </div>
 }

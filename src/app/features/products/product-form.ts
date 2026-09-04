@@ -36,18 +36,22 @@ export class ProductForm implements OnInit {
     }
   }
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     if (!this.formData.name || this.formData.price <= 0) {
       this.toast.error('يرجى ملء جميع الحقول المطلوبة');
       return;
     }
-    if (this.isEdit()) {
-      this.productService.updateProduct(this.productId, this.formData);
-      this.toast.success('تم تعديل المنتج بنجاح');
-    } else {
-      this.productService.createProduct(this.formData);
-      this.toast.success('تم إضافة المنتج بنجاح');
+    try {
+      if (this.isEdit()) {
+        await this.productService.updateProduct(this.productId, this.formData);
+        this.toast.success('تم تعديل المنتج بنجاح');
+      } else {
+        await this.productService.createProduct(this.formData);
+        this.toast.success('تم إضافة المنتج بنجاح');
+      }
+      this.router.navigate(['/products']);
+    } catch (e: unknown) {
+      this.toast.error(e instanceof Error ? e.message : 'حدث خطأ');
     }
-    this.router.navigate(['/products']);
   }
 }
