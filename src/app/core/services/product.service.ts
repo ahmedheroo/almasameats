@@ -93,12 +93,6 @@ export class ProductService {
 
     const defaults: Omit<Product, 'id' | 'createdAt'>[] = [
       { name: 'حليب طازج', price: 6.50, description: 'حليب طازج كامل الدسم', sku: 'P001', barcode: '6281000000001', imageUrl: '', active: true },
-      { name: 'خبز أبيض', price: 3.00, description: 'ربطة خبز أبيض طازج', sku: 'P002', barcode: '6281000000002', imageUrl: '', active: true },
-      { name: 'أرز بسمتي', price: 25.00, description: 'أرز بسمتي هندي 5 كجم', sku: 'P003', barcode: '6281000000003', imageUrl: '', active: true },
-      { name: 'زيت زيتون', price: 35.00, description: 'زيت زيتون بكر ممتاز 1 لتر', sku: 'P004', barcode: '6281000000004', imageUrl: '', active: true },
-      { name: 'سكر أبيض', price: 12.00, description: 'سكر أبيض ناعم 2 كجم', sku: 'P005', barcode: '6281000000005', imageUrl: '', active: true },
-      { name: 'شاي أحمر', price: 8.00, description: 'علبة شاي أحمر 100 كيس', sku: 'P006', barcode: '6281000000006', imageUrl: '', active: true },
-      { name: 'ماء معدني', price: 1.00, description: 'رزمة ماء معدني 12 حبة', sku: 'P007', barcode: '6281000000007', imageUrl: '', active: true },
       { name: 'جبنة بيضاء', price: 15.00, description: 'جبنة بيضاء طازجة 400 جرام', sku: 'P008', barcode: '6281000000008', imageUrl: '', active: true },
     ];
 

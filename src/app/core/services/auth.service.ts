@@ -139,6 +139,13 @@ export class AuthService {
         role: 'admin',
         active: true
       });
+        this.createUser({
+        username: 'cashier',
+        password: '123456',
+        displayName: 'بائع',
+        role: 'cashier',
+        active: true
+      });
     }
   }
 }
