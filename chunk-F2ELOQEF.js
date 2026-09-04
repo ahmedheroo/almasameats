@@ -1,1 +1,0 @@
-import{Ka as r}from"./chunk-Z443V2OD.js";var a=class t{transform(e){return new Date(e).toLocaleTimeString("ar-SA",{hour:"2-digit",minute:"2-digit"})}static \u0275fac=function(i){return new(i||t)};static \u0275pipe=r({name:"arabicTime",type:t,pure:!0})};export{a};
