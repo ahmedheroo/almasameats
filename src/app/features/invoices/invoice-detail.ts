@@ -35,6 +35,7 @@ import QRCode from 'qrcode';
     .pr-logo { margin-bottom: 3mm; }
     .pr-logo img { max-width: 40mm; max-height: 15mm; object-fit: contain; }
     .pr-addr, .pr-phone, .pr-taxid { font-size: 8pt; color: #555; }
+    .pr-branch { font-size: 8pt; color: #555; margin-top: 1mm; }
     .pr-meta { font-size: 9pt; margin-bottom: 3mm; }
     .pr-divider { border: none; border-top: 1px dashed #ccc; margin: 3mm 0; }
     .pr-table { width: 100%; border-collapse: collapse; font-size: 9pt; }

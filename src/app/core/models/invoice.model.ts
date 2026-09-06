@@ -19,5 +19,6 @@ export interface Invoice {
   total: number;
   paymentMethod: PaymentMethod;
   cashierName: string;
+  branchName: string;
   createdAt: string;
 }

@@ -306,13 +306,17 @@ app.post('/api/invoices', (req, res) => {
 app.get('/api/settings', (req, res) => {
   const settings = readJson('settings.json');
   const defaults = {
-    shopName: 'مسالخ الماسة المضيئة للحوم',
+    shopName: 'مسالخ الماسية المضيئة للحوم',
     address: 'الرياض - المملكة العربية السعودية',
     phone: '0500468430',
     taxId: '311940157300003',
     taxRate: 15,
     receiptWidth: '80mm',
-    logoUrl: ''
+    logoUrl: '',
+    branches: [
+      { id: 'branch-1', name: 'فرع الرياض الرئيسي', address: 'الرياض - المملكة العربية السعودية', isActive: true },
+      { id: 'branch-2', name: 'فرع الإجراء', address: 'الإجراء - المملكة العربية السعودية', isActive: true }
+    ]
   };
   res.json(settings || defaults);
 });

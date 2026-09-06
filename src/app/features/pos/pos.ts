@@ -5,7 +5,7 @@ import { ProductService } from '../../core/services/product.service';
 import { InvoiceService } from '../../core/services/invoice.service';
 import { SettingsService } from '../../core/services/settings.service';
 import { ToastService } from '../../core/services/toast.service';
-import { Product, Invoice, PaymentMethod } from '../../core/models';
+import { Product, Invoice, PaymentMethod, Branch } from '../../core/models';
 import { ArabicDatePipe } from '../../shared/pipes/date.pipe';
 import { ArabicTimePipe } from '../../shared/pipes/time.pipe';
 import { encodeZatcaQr, formatZatcaTimestamp, formatZatcaAmount } from '../../core/utils/zatca-qr';
@@ -33,8 +33,17 @@ export class Pos implements OnInit {
   showMobileCart = false;
   lastInvoice: Invoice | null = null;
   settings = computed(() => this.settingsService.settings());
+  selectedBranchId = signal<string>('');
 
   filteredProducts = signal<Product[]>([]);
+
+  activeBranches = computed(() =>
+    this.settings().branches.filter(b => b.isActive)
+  );
+
+  selectedBranch = computed(() =>
+    this.settings().branches.find(b => b.id === this.selectedBranchId())
+  );
 
   taxAmount = computed(() => {
     const sub = this.cartService.subtotal();
@@ -52,6 +61,10 @@ export class Pos implements OnInit {
 
   ngOnInit(): void {
     this.filteredProducts.set(this.productService.getActiveProducts());
+    const firstBranch = this.activeBranches()[0];
+    if (firstBranch) {
+      this.selectedBranchId.set(firstBranch.id);
+    }
   }
 
   onSearch(): void {
@@ -95,12 +108,15 @@ export class Pos implements OnInit {
       this.toast.error('السلة فارغة');
       return;
     }
-    this.lastInvoice = await this.invoiceService.completeSale(this.paymentMethod);
+    if (!this.selectedBranchId()) {
+      this.toast.error('يجب اختيار الفرع أولاً');
+      return;
+    }
+    this.lastInvoice = await this.invoiceService.completeSale(this.paymentMethod, this.selectedBranch()!.name);
     this.discountAmount = 0;
     this.showMobileCart = false;
     this.toast.success('تم إتمام البيع بنجاح');
 
-    // Generate ZATCA-compliant QR code
     setTimeout(async () => {
       const qrEl = document.getElementById('qrCode');
       if (qrEl && this.lastInvoice) {
@@ -120,7 +136,6 @@ export class Pos implements OnInit {
       }
     }, 100);
 
-    // Print after short delay
     setTimeout(() => { window.print(); }, 300);
   }
 }

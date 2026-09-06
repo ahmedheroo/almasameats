@@ -13,6 +13,7 @@
       <p><strong>رقم الفاتورة:</strong> #{{ inv.invoiceNumber }}</p>
       <p><strong>التاريخ:</strong> {{ inv.createdAt | arabicDate }}</p>
       <p><strong>الوقت:</strong> {{ inv.createdAt | arabicTime }}</p>
+      <p><strong>الفرع:</strong> {{ inv.branchName }}</p>
       <p><strong>الكاشير:</strong> {{ inv.cashierName }}</p>
       <p><strong>طريقة الدفع:</strong> {{ inv.paymentMethod }}</p>
     </div>
@@ -38,7 +39,8 @@
       }
       <div class="inv-total-row"><span>الضريبة ({{ inv.taxRate }}%):</span><span>{{ inv.taxAmount.toFixed(2) }} ر.س</span></div>
       <div class="inv-total-row inv-grand-total"><span>الإجمالي النهائي:</span><span>{{ inv.total.toFixed(2) }} ر.س</span></div>
-    </div>      <div style="text-align:center;margin-top:1rem;">
+    </div>
+    <div style="text-align:center;margin-top:1rem;">
       @if (qrDataUrl()) {
         <img [src]="qrDataUrl()" alt="QR كود" width="150" height="150">
       }
@@ -53,6 +55,9 @@
       }
       <div class="pr-shop">{{ settings().shopName }}</div>
       <div class="pr-addr">{{ settings().address }}</div>
+      @if (inv.branchName) {
+        <div class="pr-branch">الفرع: {{ inv.branchName }}</div>
+      }
       <div class="pr-phone">هاتف: {{ settings().phone }}</div>
       <div class="pr-taxid">الرقم الضريبي: {{ settings().taxId }}</div>
     </div>

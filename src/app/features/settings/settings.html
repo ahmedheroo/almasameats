@@ -1,7 +1,7 @@
 <div class="page-header">
   <h1 class="page-title">الإعدادات</h1>
 </div>
-<div class="card" style="max-width:600px;padding:1.5rem">
+<div class="card" style="max-width:700px;padding:1.5rem">
   <form (ngSubmit)="onSave()">
     <div class="form-group">
       <label>اسم المحل</label>
@@ -46,6 +46,27 @@
         </select>
       </div>
     </div>
-    <button type="submit" class="btn btn-primary btn-lg" style="margin-top:1rem"><i class="fas fa-save"></i> حفظ الإعدادات</button>
+
+    <hr style="margin:1.5rem 0;border:none;border-top:1px solid #e5e7eb">
+    <h3 style="margin-bottom:1rem">الفروع</h3>
+
+    @for (branch of formData.branches; track branch.id; let i = $index) {
+      <div class="branch-row">
+        <div class="branch-info">
+          <input type="text" [(ngModel)]="branch.name" [name]="'branch-name-' + i" placeholder="اسم الفرع" class="branch-name-input">
+          <input type="text" [(ngModel)]="branch.address" [name]="'branch-addr-' + i" placeholder="عنوان الفرع" class="branch-addr-input">
+        </div>
+        <label class="toggle-label">
+          <input type="checkbox" [(ngModel)]="branch.isActive" [name]="'branch-active-' + i">
+          <span class="toggle-slider"></span>
+          <span class="toggle-text">تفعيل</span>
+        </label>
+        <button type="button" class="btn btn-danger btn-sm" (click)="removeBranch(i)"><i class="fas fa-trash-alt"></i></button>
+      </div>
+    }
+
+    <button type="button" class="btn btn-secondary" (click)="addBranch()" style="margin-top:0.75rem"><i class="fas fa-plus"></i> فرع جديد</button>
+
+    <button type="submit" class="btn btn-primary btn-lg" style="margin-top:1.5rem"><i class="fas fa-save"></i> حفظ الإعدادات</button>
   </form>
 </div>

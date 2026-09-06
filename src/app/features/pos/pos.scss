@@ -1,5 +1,6 @@
 .pos-layout { display: flex; height: calc(100vh - 3rem); gap: 1rem; }
 .products-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.branch-select { flex: 0 0 180px; padding: 0.4rem 0.6rem; border: 1px solid #e5e7eb; border-radius: 8px; background: white; color: #111827; font-family: 'Cairo', sans-serif; font-size: 0.85rem; cursor: pointer; direction: rtl; }
 .search-bar { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
 .search-input, .barcode-input { flex: 1; }
 .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.75rem; overflow-y: auto; padding-bottom: 1rem; }
@@ -53,6 +54,7 @@
 .inv-logo img { max-width: 40mm; max-height: 15mm; object-fit: contain; }
 .inv-header { margin-bottom: 5mm; }
 .inv-shop { font-size: 14pt; font-weight: 800; }
+.inv-branch { font-size: 8pt; color: #555; margin-top: 1mm; }
 .inv-addr, .inv-phone, .inv-taxid { font-size: 8pt; color: #555; }
 .inv-meta { font-size: 9pt; margin-bottom: 3mm; }
 .inv-divider { border: none; border-top: 1px dashed #ccc; margin: 3mm 0; }

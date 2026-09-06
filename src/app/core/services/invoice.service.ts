@@ -22,7 +22,7 @@ export class InvoiceService {
     this._invoices.set(invoices);
   }
 
-  async completeSale(paymentMethod: PaymentMethod): Promise<Invoice> {
+  async completeSale(paymentMethod: PaymentMethod, branchName: string): Promise<Invoice> {
     const items = this.cartService.items();
     const discount = this.cartService.discount();
     const subtotal = this.cartService.subtotal();
@@ -51,6 +51,7 @@ export class InvoiceService {
       total,
       paymentMethod,
       cashierName: currentUser?.displayName ?? 'غير معروف',
+      branchName,
       createdAt: new Date().toISOString()
     };
 
